@@ -1,0 +1,50 @@
+services:
+  mysql:
+    image: mysql:9.2.0
+    restart: "no"
+    ports:
+      - "3307:3307"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: MySqlDeploy
+    healthcheck:
+      test: mysqladmin ping -u root -p $$MYSQL_ROOT_PASSWORD
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+  phpmyadmin:
+    image: phpmyadmin:5.2.2
+    restart: "no"
+    ports:
+      - "8282:80"
+    volumes:
+      - phpmyadmin_data:/sessions
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    healthcheck:
+      test: curl --fail -s http://localhost/robots.txt || exit -1
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+  deploy-my-sql-progect:
+    image: deploy-my-sql-progect:latest
+    build:
+      context: .
+      args:
+        DOCKER_BUILDKIT: 1
+    restart: "no"
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+volumes:
+  mysql_data:
+  phpmyadmin_data:
