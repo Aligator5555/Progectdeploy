@@ -48,3 +48,19 @@ services:
 volumes:
   mysql_data:
   phpmyadmin_data:
+
+
+    nginx:
+      image: public.ecr.aws/nginx/nginx:1.27-alpine3.21-slim
+      ports:
+        - "8282:80"
+      environment:
+        -NGINX_HOST=app
+        -NGINX_PORT=8081
+
+      depends_on:
+        - app
+
+  x-aws-login:
+    username: ${DOCKER_USERNAME}
+    password: ${DOCKER_PASSWORD}
